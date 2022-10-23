@@ -46,3 +46,18 @@ In SpringBoot you can make a model (which is a Java class) so that it correspond
 * Read all records: GET (with no id)
 * Delete a record: DELETE
 
+{
+John
+Doe
+01/01/1980
+}
+
+{
+Sam
+}
+
+{
+Sam
+Doe
+01/01/1980
+}

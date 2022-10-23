@@ -1,6 +1,17 @@
 package com.example.tasklistcrudexample.models;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+// INSERT INTO TODO_ITEM (ID, COMPLETED, DESCRIPTION, TITLE)
+//VALUES (1, true, 'wash clothes', 'do laundry');
+
+@Entity
 public class TodoItem {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
     private String description;

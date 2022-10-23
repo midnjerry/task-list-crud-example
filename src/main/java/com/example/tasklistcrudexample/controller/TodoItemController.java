@@ -1,62 +1,80 @@
 package com.example.tasklistcrudexample.controller;
 
+import com.example.tasklistcrudexample.exception.TodoItemNotFoundException;
 import com.example.tasklistcrudexample.models.TodoItem;
+import com.example.tasklistcrudexample.responses.TodoItemPatchRequest;
+import com.example.tasklistcrudexample.responses.TodoItemPatchResponse;
+import com.example.tasklistcrudexample.responses.TodoItemResponse;
+import com.example.tasklistcrudexample.service.TaskListBusinessLogicService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 @RestController
 @RequestMapping("/tasks")
 public class TodoItemController {
+    private TaskListBusinessLogicService taskListBusinessLogicService;
 
-    @GetMapping("/me")
-    public List<TodoItem> getTodoItem() {
-        TodoItem todoItem = new TodoItem();
-        todoItem.setId(10L);
-        todoItem.setTitle("Clean bathroom");
-        todoItem.setDescription("Scrub the sink, tub, and toilet");
-        todoItem.setCompleted(false);
-        return Arrays.asList(todoItem, todoItem, todoItem);
+    @Autowired // Constructor, setter, reflection
+    public TodoItemController(TaskListBusinessLogicService taskListBusinessLogicService){
+        this.taskListBusinessLogicService = taskListBusinessLogicService;
     }
+
+    // GET tasks
+    // GET tasks/{id}
+    // POST tasks
+    // PUT tasks/{id}
+    // PATCH tasks/{id}
+    // DELETE tasks/{id}
 
     @GetMapping()
     public List<TodoItem> getAllTodoItems() {
-        return Arrays.asList();
+        return taskListBusinessLogicService.getAllItems();
     }
 
     @GetMapping("{id}")
-    public TodoItem getItemById(@PathVariable Long id) {
-        TodoItem todoItem = new TodoItem();
-        todoItem.setId(id);
-        todoItem.setTitle("Grabbing a task by id");
-        todoItem.setDescription("Make my bed, pick up my clothes");
-        todoItem.setCompleted(false);
-        return todoItem;
+    public ResponseEntity<TodoItem> getItemById(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(taskListBusinessLogicService.getById(id));
+        }
+        catch (TodoItemNotFoundException e){
+            // throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Foo Not Found", e);
+            return new ResponseEntity(new TodoItemResponse( null, e.getMessage()), HttpStatus.NOT_FOUND);
+        }
     }
 
     @PostMapping()
     public TodoItem createTodoItem(@RequestBody TodoItem body) {
-        TodoItem todoItem = new TodoItem();
-        todoItem.setId(423L);
-        todoItem.setCompleted(body.isCompleted());
-        todoItem.setTitle(body.getTitle());
-        todoItem.setDescription(body.getDescription());
-        return todoItem;
+        return taskListBusinessLogicService.createTodoItem(body);
     }
 
     @PutMapping("{id}")
-    public TodoItem overwriteRecord(@PathVariable Long id, @RequestBody TodoItem body) {
-        return null;
+    public ResponseEntity<TodoItem> overwriteRecord(@PathVariable Long id, @RequestBody TodoItem body) {
+        try {
+            return ResponseEntity.ok(taskListBusinessLogicService.replaceTodoItem(id, body));
+        }
+        catch (TodoItemNotFoundException e){
+            return new ResponseEntity(new TodoItemResponse( body, e.getMessage()), HttpStatus.NOT_FOUND);
+        }
     }
 
     @PatchMapping("{id}")
-    public TodoItem useNonNullFieldsToUpdateRecord(@PathVariable Long id, @RequestBody TodoItem body) {
-        return null;
+    public ResponseEntity<TodoItem> useNonNullFieldsToUpdateRecord(@PathVariable Long id, @RequestBody TodoItemPatchRequest body) {
+        try {
+            return ResponseEntity.ok(taskListBusinessLogicService.updateTodoItem(id, body));
+        }
+        catch (TodoItemNotFoundException e){
+            return new ResponseEntity(new TodoItemPatchResponse( body, e.getMessage()), HttpStatus.NOT_FOUND);
+            // return new ResponseEntity(body, HttpStatus.NOT_FOUND);
+        }
     }
 
     @DeleteMapping("{id}")
-    public TodoItem deleteTheItem(@PathVariable Long id) {
-        return null;
+    public ResponseEntity<TodoItemResponse> deleteTheItem(@PathVariable Long id) {
+        taskListBusinessLogicService.deleteTodoItem(id);
+        return ResponseEntity.ok(new TodoItemResponse(null, "Task " + id + " was deleted."));
     }
 }
