@@ -24,7 +24,8 @@ and wants to get rid of the task, they can DELETE it.
 What we are writing is actually called a microservice, and a microservice follows a particular pattern.
 * Controller layer (this handles HTTP traffic)
 * Service layer (this is your business logic)
-* Database layer (this is what talks to the database)
+* Repository layer (this is what talks to the database)
+* Model layer (this is how to format your data)
   
 ### How do you organize and persist data?
 In Spring Boot we do it with tables.  The Task table should have the following:
